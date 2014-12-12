@@ -8,8 +8,16 @@ Created on 28 Nov 2014
 import psycopg2
 import datetime
 
+class Singleton(type):
+    def __call__(self, *args, **kwargs):
+        try:
+            return self.__instance
+        except AttributeError:
+            self.__instance = super(Singleton, self).__call__(*args, **kwargs)
+            return self.__instance
 
-class DatabaseAccessManager(object):
+class DatabaseAccessManager():
+    __metaclass__ = Singleton
 
     connection = None
 

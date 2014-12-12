@@ -5,21 +5,14 @@ Created on 28 Nov 2014
 @copyright: 2014 Codethink Ltd. All rights reserved.
 '''
 
-import threading
 import SocketServer
-import uuid
-import time
-from DatabaseAccess import DatabaseAccessManager
-from tbdiffWrapper import tbdiffCreate
+from DatabaseAccessModule import DatabaseAccessManager
 
 db = DatabaseAccessManager()
-PatchJobs = list()
-PatchJobsLock = threading.Lock()
 
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        getPatch("image1", "image2")
         self.request.sendall("complete")
         '''
         while (1):
@@ -35,50 +28,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
-
-
-def getPatch(SourceImage, TargetImage):
-    '''
-    If patch has already been created return the file, if not create the patch
-    and return it.  If the patch is currently being created then wait for the
-    signal that it is complete then return that result rather than generating
-    a new patch for every request.
-    '''
-    PatchDir = db.getPatchDirectory(SourceImage, TargetImage)
-    if PatchDir is not None:
-        return PatchDir
-
-    PatchName = SourceImage + TargetImage
-
-    CreatePatch = False
-    with PatchJobsLock:
-        if PatchName in PatchJobs:
-            print("already there")
-        else:
-            CreatePatch = True
-            PatchJobs.append(PatchName)
-            print("added" + PatchName)
-
-    if CreatePatch is True:
-        print("creating patch")
-        time.sleep(10) 
-        with PatchJobsLock:
-            db.addPatch(PatchName, SourceImage, TargetImage, "file-path")
-            PatchJobs.remove(PatchName)
-        
-
-def createPatch(SourceImage, TargetImage):
-    '''
-    Create a new patch file from the two images given, store its details in the
-    database and return the file path to the patch file.
-    '''
-    SourceDir = db.getImageDirectory(SourceImage)
-    TargetDir = db.getImageDirectory(TargetImage)
-
-    PatchName = str(uuid.uuid4())
-    PatchDir = "PatchDir/" + PatchName
-
-    tbdiffCreate(PatchDir, SourceDir, TargetDir)
 
 
 def main():
