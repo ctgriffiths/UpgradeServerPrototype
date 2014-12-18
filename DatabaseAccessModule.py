@@ -8,6 +8,7 @@ Created on 28 Nov 2014
 import psycopg2
 import datetime
 
+
 class Singleton(type):
     def __call__(self, *args, **kwargs):
         try:
@@ -15,6 +16,7 @@ class Singleton(type):
         except AttributeError:
             self.__instance = super(Singleton, self).__call__(*args, **kwargs)
             return self.__instance
+
 
 class DatabaseAccessManager():
     __metaclass__ = Singleton
@@ -35,18 +37,17 @@ class DatabaseAccessManager():
         if self.connect is None:
             return "ERROR: Connection not initialised"
         cursor = self.connection.cursor()
-        cursor.execute("""SELECT * FROM patches WHERE source_image=%s
-                        AND target_image=%s;""",
-                        (sourceImage, targetImage))
-        return cursor.fetchone()
+        cursor.execute("""SELECT file_path FROM patches WHERE source_image=%s
+                        AND target_image=%s;""", (sourceImage, targetImage))
+        return cursor.fetchone()[0]
 
     def getImageDirectory(self, imageName):
         if self.connect is None:
             return "ERROR: Connection not initialised"
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM images WHERE name=%s;",
+        cursor.execute("SELECT file_path FROM images WHERE name=%s;",
                        (imageName,))
-        return cursor.fetchone()
+        return cursor.fetchone()[0]
 
     def addPatch(self, name, sourceImage, targeImage, file_path):
         cursor = self.connection.cursor()

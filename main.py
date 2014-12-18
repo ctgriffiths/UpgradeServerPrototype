@@ -7,23 +7,17 @@ Created on 28 Nov 2014
 
 import SocketServer
 from DatabaseAccessModule import DatabaseAccessManager
+from PatchFileModule import PatchFileManager
 
 db = DatabaseAccessManager()
+PatchManager = PatchFileManager()
 
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        self.request.sendall("complete")
-        '''
-        while (1):
-            test code, echo response back to client indefinitely, actual patch
-            request protocol will be implemented here.
-
-            self.data = self.request.recv(1024).strip()
-            print("{} wrote:".format(self.client_address[0]))
-            print(self.data)
-            self.request.sendall(self.data.upper() + "\n")
-            '''
+        self.request.sendall("yes")
+        Patch = PatchManager.getPatch("test5", "test4")
+        self.request.sendall(str(Patch))
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -33,13 +27,8 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 def main():
     print("main")
     db.connect()
-    db.addImage("test5", "x86", "/root/")
-    db.addPatch("patch1", "test1", "test2", "/root/")
     print(db.getImageDirectory("test"))
     print(db.getPatchDirectory("test1", "test2"))
-
-    """tbdiffCreate("1","2","3")"""
-
     HOST, PORT = "localhost", 0
     server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
     print(server.server_address)
