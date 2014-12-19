@@ -1,0 +1,152 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.4beta2
+-- Dumped by pg_dump version 9.4beta2
+-- Started on 2014-12-19 17:14:56 GMT
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- TOC entry 174 (class 3079 OID 11861)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2013 (class 0 OID 0)
+-- Dependencies: 174
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 172 (class 1259 OID 21850)
+-- Name: images; Type: TABLE; Schema: public; Owner: craiggriffiths; Tablespace: 
+--
+
+CREATE TABLE images (
+    name character varying NOT NULL,
+    architecture character varying,
+    uploaded_timestamp timestamp with time zone,
+    file_path character varying
+);
+
+
+ALTER TABLE images OWNER TO craiggriffiths;
+
+--
+-- TOC entry 173 (class 1259 OID 21853)
+-- Name: patches; Type: TABLE; Schema: public; Owner: craiggriffiths; Tablespace: 
+--
+
+CREATE TABLE patches (
+    name character varying,
+    source_image character varying NOT NULL,
+    target_image character varying NOT NULL,
+    created_timestamp timestamp with time zone,
+    file_path character varying
+);
+
+
+ALTER TABLE patches OWNER TO craiggriffiths;
+
+--
+-- TOC entry 2004 (class 0 OID 21850)
+-- Dependencies: 172
+-- Data for Name: images; Type: TABLE DATA; Schema: public; Owner: craiggriffiths
+--
+
+COPY images (name, architecture, uploaded_timestamp, file_path) FROM stdin;
+test	x86	2005-11-18 00:00:00+00	/root/
+test1	x86	2005-11-18 00:00:00+00	/root/
+test2	x86	2005-11-18 00:00:00+00	/root/
+test3	x86	2005-11-18 00:00:00+00	/root/
+test4	x86	2005-11-18 00:00:00+00	/root/
+test5	x86	2005-11-18 00:00:00+00	/root/
+base	x86-64	2005-11-18 00:00:00+00	/home/craiggriffiths/Downloads/baserock-14.22-base-system-x86_64-generic.img
+build	x86-64	2005-11-18 00:00:00+00	/home/craiggriffiths/Downloads/build-system-x86_64.img
+\.
+
+
+--
+-- TOC entry 2005 (class 0 OID 21853)
+-- Dependencies: 173
+-- Data for Name: patches; Type: TABLE DATA; Schema: public; Owner: craiggriffiths
+--
+
+COPY patches (name, source_image, target_image, created_timestamp, file_path) FROM stdin;
+327b9904-ffbe-4b74-b655-47e72cd0dc82	base	build	2005-11-18 00:00:00+00	/327b9904-ffbe-4b74-b655-47e72cd0dc82
+\.
+
+
+--
+-- TOC entry 1890 (class 2606 OID 21919)
+-- Name: pk_image; Type: CONSTRAINT; Schema: public; Owner: craiggriffiths; Tablespace: 
+--
+
+ALTER TABLE ONLY images
+    ADD CONSTRAINT pk_image PRIMARY KEY (name);
+
+
+--
+-- TOC entry 1892 (class 2606 OID 21898)
+-- Name: pk_patch; Type: CONSTRAINT; Schema: public; Owner: craiggriffiths; Tablespace: 
+--
+
+ALTER TABLE ONLY patches
+    ADD CONSTRAINT pk_patch PRIMARY KEY (source_image, target_image);
+
+
+--
+-- TOC entry 1893 (class 2606 OID 21920)
+-- Name: fk_source_image; Type: FK CONSTRAINT; Schema: public; Owner: craiggriffiths
+--
+
+ALTER TABLE ONLY patches
+    ADD CONSTRAINT fk_source_image FOREIGN KEY (source_image) REFERENCES images(name);
+
+
+--
+-- TOC entry 1894 (class 2606 OID 21925)
+-- Name: fk_target_image; Type: FK CONSTRAINT; Schema: public; Owner: craiggriffiths
+--
+
+ALTER TABLE ONLY patches
+    ADD CONSTRAINT fk_target_image FOREIGN KEY (target_image) REFERENCES images(name);
+
+
+--
+-- TOC entry 2012 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+-- Completed on 2014-12-19 17:14:57 GMT
+
+--
+-- PostgreSQL database dump complete
+--
+
