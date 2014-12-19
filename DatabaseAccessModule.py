@@ -33,21 +33,31 @@ class DatabaseAccessManager():
         self.connection = psycopg2.connect(conn_string)
         print ("Connected\n")
 
-    def getPatchDirectory(self, sourceImage, targetImage):
+    def getPatchPath(self, sourceImage, targetImage):
         if self.connect is None:
             return "ERROR: Connection not initialised"
         cursor = self.connection.cursor()
         cursor.execute("""SELECT file_path FROM patches WHERE source_image=%s
                         AND target_image=%s;""", (sourceImage, targetImage))
-        return cursor.fetchone()[0]
+        record = cursor.fetchone()
+        if record:
+            return record[0]
+            'fetchone() returns a list of 1 item so we want the first value'
+        else:
+            return None
 
-    def getImageDirectory(self, imageName):
+    def getImagePath(self, imageName):
         if self.connect is None:
             return "ERROR: Connection not initialised"
         cursor = self.connection.cursor()
         cursor.execute("SELECT file_path FROM images WHERE name=%s;",
                        (imageName,))
-        return cursor.fetchone()[0]
+        record = cursor.fetchone()
+        if record:
+            return record[0]
+            'fetchone() returns a list of 1 item so we want the first value'
+        else:
+            return None
 
     def addPatch(self, name, sourceImage, targeImage, file_path):
         cursor = self.connection.cursor()

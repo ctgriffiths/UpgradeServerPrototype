@@ -7,9 +7,8 @@ Created on 12 Dec 2014
 
 import threading
 import uuid
-import time
 from DatabaseAccessModule import DatabaseAccessManager
-from tbdiffWrapper import tbdiffCreate
+from tbdiffWrapper import tbdiffCreate, mount
 
 
 class PatchFileManager():
@@ -37,7 +36,7 @@ class PatchFileManager():
         for the signal that it is complete then return that result rather than
         generating a new patch for every request.
         '''
-        PatchDir = self.db.getPatchDirectory(SourceImage, TargetImage)
+        PatchDir = self.db.getPatchPath(SourceImage, TargetImage)
         if PatchDir is not None:
             return PatchDir
 
@@ -63,32 +62,45 @@ class PatchFileManager():
             print("Waited, now job is complete!")
         else:
             print("creating patch")
-            time.sleep(10)
-            CurrentPatchJob.JobComplete.set()
-            with self.PatchJobsLock:
-                self.db.addPatch(PatchName, SourceImage, TargetImage,
-                                 "file-path")
-                self.PatchJobs.remove(CurrentPatchJob)
+            self.__createPatch(SourceImage, TargetImage, CurrentPatchJob)
 
-        PatchDir = self.db.getPatchDirectory(SourceImage, TargetImage)
+        PatchDir = self.db.getPatchPath(SourceImage, TargetImage)
         if PatchDir is not None:
             return PatchDir
 
-    def __createPatch(self, SourceImage, TargetImage):
+    def __createPatch(self, SourceImage, TargetImage, CurrentPatchJob):
         '''
         Create a new patch file from the two images given, store its details in
         the database and return the file path to the patch file.
         '''
-        SourceDir = self.db.getImageDirectory(SourceImage)
-        TargetDir = self.db.getImageDirectory(TargetImage)
+        
+        SourcePath = self.db.getImagePath(SourceImage)
+        TargetPath = self.db.getImagePath(TargetImage)
+        
         '''
-        TODO: create a sub volume for the two images before running tbdiff.
-        Check how this is currently handled in system version manager.  This
-        ideally should be files system agnostic so consider mounting images
-        as a fall back.
+        Create a sub volume for the two images before running tbdiff. Check how
+        this is currently handled in system version manager.  This ideally
+        should be files system agnostic so consider mounting images as a fall
+        back.
         '''
-
+        
+        SourceMountPoint = "/tmp/" + str(uuid.uuid4())
+        TargetMountPoint = "/tmp/" + str(uuid.uuid4())
+        
+        print (SourcePath)
+        print (SourceMountPoint)
+        mount(SourcePath, SourceMountPoint)
+        print (TargetPath)
+        print (TargetMountPoint)
+        mount(TargetPath, TargetMountPoint)
+        
         PatchName = str(uuid.uuid4())
-        PatchDir = "PatchDir/" + PatchName
-
-        tbdiffCreate(PatchDir, SourceDir, TargetDir)
+        print("Using patchname: " + PatchName)
+        PatchPath = "/" + PatchName
+        
+        tbdiffCreate(PatchPath, SourcePath, TargetPath)
+        
+        CurrentPatchJob.JobComplete.set()
+        with self.PatchJobsLock:
+            self.db.addPatch(PatchName, SourceImage, TargetImage, PatchPath)
+            self.PatchJobs.remove(CurrentPatchJob)

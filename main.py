@@ -16,7 +16,7 @@ PatchManager = PatchFileManager()
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         self.request.sendall("yes")
-        Patch = PatchManager.getPatch("test5", "test4")
+        Patch = PatchManager.getPatch("base", "build")
         self.request.sendall(str(Patch))
 
 
@@ -27,8 +27,11 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 def main():
     print("main")
     db.connect()
-    print(db.getImageDirectory("test"))
-    print(db.getPatchDirectory("test1", "test2"))
+    db.addImage("base", "x86-64", "/home/craiggriffiths/Downloads/baserock-14.22-base-system-x86_64-generic.img")
+    db.addImage("build", "x86-64", "/home/craiggriffiths/Downloads/build-system-x86_64.img")
+    print(db.getImagePath("base"))
+    print(db.getImagePath("build"))
+    print(db.getPatchPath("test1", "test2"))
     HOST, PORT = "localhost", 0
     server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
     print(server.server_address)
