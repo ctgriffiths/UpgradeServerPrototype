@@ -5,20 +5,20 @@ Created on 28 Nov 2014
 @copyright: 2014 Codethink Ltd. All rights reserved.
 '''
 
-from subprocess import check_call, call
-from os.path import expanduser
-
 
 def tbdiffCreate(patchDir, sourceDir, targetDir):
-    return call(["sudo tbdiff-create", patchDir, sourceDir, targetDir], shell=True)
+    print ("Please run: tbdiff-create " + patchDir + " "
+                                        + sourceDir + " "
+                                        + targetDir)
+    raw_input("Press Enter when the command completes...")
 
 def mount(imagePath, mountPath):
-    print ("making directory")
-    check_call( [ 'mkdir', expanduser( mountPath ) ] )
-    print ("calling mount")
-    return call(["sudo mount", 
-                       expanduser(imagePath), 
-                       expanduser(mountPath)], shell=True)
+    print ("Please run: mkdir " + mountPath)
+    raw_input("Press Enter when the command completes...")
+
+    print ("Please run: mount " + imagePath + " " + mountPath)
+    raw_input("Press Enter when the command completes...")
 
 def unmount(mountPath):
-    return check_call(["sudo umount", mountPath])
+    print ("Please run: umount " + mountPath)
+    raw_input("Press Enter when the command completes...")

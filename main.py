@@ -15,9 +15,10 @@ PatchManager = PatchFileManager()
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        self.request.sendall("yes")
         Patch = PatchManager.getPatch("base", "build")
         self.request.sendall(str(Patch))
+        'f = open(Patch)'
+        'self.request.sendall(f.read())'
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):

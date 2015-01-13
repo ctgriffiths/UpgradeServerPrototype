@@ -8,7 +8,7 @@ Created on 12 Dec 2014
 import threading
 import uuid
 from DatabaseAccessModule import DatabaseAccessManager
-from tbdiffWrapper import tbdiffCreate, mount
+from tbdiffWrapper import tbdiffCreate, mount, unmount
 
 
 class PatchFileManager():
@@ -96,7 +96,7 @@ class PatchFileManager():
         
         PatchName = str(uuid.uuid4())
         print("Using patchname: " + PatchName)
-        PatchPath = "/" + PatchName
+        PatchPath = "/tmp/" + PatchName
         
         tbdiffCreate(PatchPath, SourcePath, TargetPath)
         
@@ -104,3 +104,6 @@ class PatchFileManager():
         with self.PatchJobsLock:
             self.db.addPatch(PatchName, SourceImage, TargetImage, PatchPath)
             self.PatchJobs.remove(CurrentPatchJob)
+
+        unmount(SourceMountPoint)
+        unmount(TargetMountPoint)
