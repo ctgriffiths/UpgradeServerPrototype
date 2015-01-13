@@ -9,16 +9,29 @@ import SocketServer
 from DatabaseAccessModule import DatabaseAccessManager
 from PatchFileModule import PatchFileManager
 
+' _Test parameters_ '
+SourceImageName = "base"
+SourceImagePath = "/home/craiggriffiths/Downloads/baserock-14.22-base-system-x86_64-generic.img"
+TargetImageName = "build"
+TargetImagepath = "/home/craiggriffiths/Downloads/build-system-x86_64.img"
+
 db = DatabaseAccessManager()
 PatchManager = PatchFileManager()
 
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        Patch = PatchManager.getPatch("base", "build")
+        Patch = PatchManager.getPatch(SourceImageName, TargetImageName)
         self.request.sendall(str(Patch))
-        'f = open(Patch)'
-        'self.request.sendall(f.read())'
+
+        '''
+        Send the file back over the socket, only enable this if your resulting
+        patch is small otherwise it will take a while over telnet.
+        '''
+        '''
+        f = open(Patch)
+        self.request.sendall(f.read())
+        '''
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -28,11 +41,8 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 def main():
     print("main")
     db.connect()
-    db.addImage("base", "x86-64", "/home/craiggriffiths/Downloads/baserock-14.22-base-system-x86_64-generic.img")
-    db.addImage("build", "x86-64", "/home/craiggriffiths/Downloads/build-system-x86_64.img")
-    print(db.getImagePath("base"))
-    print(db.getImagePath("build"))
-    print(db.getPatchPath("test1", "test2"))
+    db.addImage(SourceImageName, "x86-64", SourceImagePath)
+    db.addImage(TargetImageName, "x86-64", TargetImagepath)
     HOST, PORT = "localhost", 0
     server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
     print(server.server_address)
