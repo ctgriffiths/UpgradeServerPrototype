@@ -21,6 +21,7 @@ PatchManager = PatchFileManager()
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
+        print("Client connected")
         Patch = PatchManager.getPatch(SourceImageName, TargetImageName)
         self.request.sendall(str(Patch))
 
@@ -32,6 +33,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         f = open(Patch)
         self.request.sendall(f.read())
         '''
+        print("Request Served")
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
