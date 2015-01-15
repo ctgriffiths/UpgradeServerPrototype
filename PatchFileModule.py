@@ -73,33 +73,33 @@ class PatchFileManager():
         Create a new patch file from the two images given, store its details in
         the database and return the file path to the patch file.
         '''
-        
+
         SourcePath = self.db.getImagePath(SourceImage)
         TargetPath = self.db.getImagePath(TargetImage)
-        
+
         '''
         Create a sub volume for the two images before running tbdiff. Check how
         this is currently handled in system version manager.  This ideally
         should be files system agnostic so consider mounting images as a fall
         back.
         '''
-        
+
         SourceMountPoint = "/tmp/" + str(uuid.uuid4())
         TargetMountPoint = "/tmp/" + str(uuid.uuid4())
-        
+
         print (SourcePath)
         print (SourceMountPoint)
         mount(SourcePath, SourceMountPoint)
         print (TargetPath)
         print (TargetMountPoint)
         mount(TargetPath, TargetMountPoint)
-        
+
         PatchName = str(uuid.uuid4())
         print("Using patchname: " + PatchName)
         PatchPath = "/tmp/" + PatchName
-        
+
         tbdiffCreate(PatchPath, SourcePath, TargetPath)
-        
+
         CurrentPatchJob.JobComplete.set()
         with self.PatchJobsLock:
             self.db.addPatch(PatchName, SourceImage, TargetImage, PatchPath)
