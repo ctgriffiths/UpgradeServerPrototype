@@ -10,6 +10,7 @@ import uuid
 from DatabaseAccessModule import DatabaseAccessManager
 from tbdiffWrapper import tbdiffCreate, mount, unmount
 
+LogPrefix = "PFM:\t"
 
 class PatchFileManager():
 
@@ -27,7 +28,7 @@ class PatchFileManager():
         self.db = DatabaseAccessManager()
         self.PatchJobs = list()
         self.PatchJobsLock = threading.Lock()
-        print("PatchFileManager created.")
+        print(LogPrefix + "PatchFileManager created.")
 
     def getPatch(self, SourceImage, TargetImage):
         '''
@@ -55,13 +56,13 @@ class PatchFileManager():
                 newJob = self.PatchJob(PatchName)
                 self.PatchJobs.append(newJob)
                 CurrentPatchJob = newJob
-                print("added" + PatchName)
+                print(LogPrefix + "Added Patch: " + PatchName)
 
         if CreatePatch is False:
             CurrentPatchJob.JobComplete.wait()
-            print("Waited, now job is complete!")
+            print(LogPrefix + "Waited, now job is complete!")
         else:
-            print("creating patch")
+            print(LogPrefix + "Creating patch")
             self.__createPatch(SourceImage, TargetImage, CurrentPatchJob)
 
         PatchDir = self.db.getPatchPath(SourceImage, TargetImage)
@@ -87,15 +88,15 @@ class PatchFileManager():
         SourceMountPoint = "/tmp/" + str(uuid.uuid4())
         TargetMountPoint = "/tmp/" + str(uuid.uuid4())
 
-        print (SourcePath)
-        print (SourceMountPoint)
+        print (LogPrefix + "Source Image: " + SourcePath)
+        print (LogPrefix + "Source Mount Point: " + SourceMountPoint)
         mount(SourcePath, SourceMountPoint)
-        print (TargetPath)
-        print (TargetMountPoint)
+        print (LogPrefix + "Target Image" + TargetPath)
+        print (LogPrefix + "Target Mount Point: " + TargetMountPoint)
         mount(TargetPath, TargetMountPoint)
 
         PatchName = str(uuid.uuid4())
-        print("Using patchname: " + PatchName)
+        print(LogPrefix + "Using Patch Name: " + PatchName)
         PatchPath = "/tmp/" + PatchName
 
         tbdiffCreate(PatchPath, SourcePath, TargetPath)

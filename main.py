@@ -15,13 +15,14 @@ SourceImagePath = "/home/craiggriffiths/Downloads/baserock-14.22-base-system-x86
 TargetImageName = "build"
 TargetImagepath = "/home/craiggriffiths/Downloads/build-system-x86_64.img"
 
+LogPrefix = "MAIN:\t"
 db = DatabaseAccessManager()
 PatchManager = PatchFileManager()
 
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        print("Client connected")
+        print(LogPrefix + "Client connected")
         Patch = PatchManager.getPatch(SourceImageName, TargetImageName)
         self.request.sendall(str(Patch))
 
@@ -33,7 +34,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         f = open(Patch)
         self.request.sendall(f.read())
         '''
-        print("Request Served")
+        print(LogPrefix + "Request Served")
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -41,13 +42,13 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
 
 def main():
-    print("main")
+    print(LogPrefix + "Program Entry Point")
     db.connect()
     db.addImage(SourceImageName, "x86-64", SourceImagePath)
     db.addImage(TargetImageName, "x86-64", TargetImagepath)
     HOST, PORT = "localhost", 0
     server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
-    print(server.server_address)
+    print(LogPrefix + "Listening on: " + str(server.server_address))
     server.serve_forever()
 
 if __name__ == "__main__":
